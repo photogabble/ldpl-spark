@@ -123,7 +123,7 @@ SUB-PROCEDURE normalise
             DIVIDE normalise.a BY normalise.x IN normalise.b
             MULTIPLY normalise.b BY 7 IN normalise.a
             FLOOR normalise.a
-            JOIN const.ticks:normalise.a AND output IN output
+            JOIN output AND const.ticks:normalise.a IN output
         ADD i AND 1 IN i
     REPEAT
 END SUB-PROCEDURE
