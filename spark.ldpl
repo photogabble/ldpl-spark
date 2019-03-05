@@ -1,0 +1,130 @@
+#
+# Spark
+# Ported from Bash to LDPL by Simon Dann
+#
+# Generates sparklines for a set of data.
+#
+# spark takes a space-separated list of data and then prints
+# a sparkline out of it.
+#
+# Example:
+#
+#   $ ldpl spark 1 5 22 13 53
+#   # => ▁▁▃▂▇
+#
+#   spark -h|--help
+#   # => Prints the spark help text.
+#
+#   spark -v|--version
+#   # => Prints the spark version  text.
+#
+# Source project: https://github.com/holman/spark
+#
+
+DATA:
+
+local.n IS NUMBER
+local.numbers IS NUMBER VECTOR
+local.ticks IS TEXT VECTOR
+
+local.min IS NUMBER
+local.max IS NUMBER
+
+i IS NUMBER
+n IS NUMBER
+
+PROCEDURE:
+
+#
+# Initial state for min/max
+#
+STORE 0 IN local.min
+STORE 0 IN local.max
+
+#
+# Constants
+#
+STORE "▁" IN local.ticks:0
+STORE "▂" IN local.ticks:1
+STORE "▃" IN local.ticks:2
+STORE "▄" IN local.ticks:3
+STORE "▅" IN local.ticks:4
+STORE "▆" IN local.ticks:5
+STORE "▇" IN local.ticks:6
+STORE "█" IN local.ticks:7
+
+#
+# If argument is -h or --help, display usage and exit
+#
+SUB-PROCEDURE help
+    DISPLAY "USAGE:" CRLF
+    DISPLAY "  ldpl spark [-v|--version|-h|--help] VALUE,..." CRLF CRLF
+
+    DISPLAY "EXAMPLES:" CRLF
+    DISPLAY "  $ ldpl spark 1 5 22 13 53" CRLF
+    DISPLAY "▁▁▃▂█" CRLF
+    DISPLAY "  $ ldpl spark 0 30 55 80 33 150" CRLF
+    DISPLAY "▁▂▃▄▂█" CRLF
+    DISPLAY "  $ ldpl spark 9 13 5 17 1" CRLF
+    DISPLAY "▄▆▂█▁" CRLF
+    EXIT
+END SUB-PROCEDURE
+
+#
+# If argument is -v or --version, display version and exit
+#
+SUB-PROCEDURE version
+    DISPLAY "Version 1.0.0 - 5th March 2019" CRLF
+END SUB-PROCEDURE
+
+#
+# Find Min/Max Values
+#
+SUB-PROCEDURE find-min-max
+    STORE 0 IN i
+    WHILE i IS LESS THAN argc DO
+        IF i IS EQUAL TO 0 THEN
+            STORE argv:i IN local.min
+            STORE argv:i IN local.max
+        END IF
+
+        STORE argv:i IN n
+
+        IF n IS LESS THAN local.min THEN
+            STORE argv:i IN local.min
+        END IF
+
+        IF n IS GREATER THAN local.max THEN
+            STORE argv:i IN local.max
+        END IF
+
+        DISPLAY argv:i CRLF
+
+        ADD i AND 1 IN i
+    REPEAT
+END SUB-PROCEDURE
+
+IF argc IS LESS THAN OR EQUAL TO 1 THEN
+    IF argc IS EQUAL TO 1 THEN
+        IF argv:0 IS EQUAL TO "-h" THEN
+            CALL SUB-PROCEDURE help
+        END IF
+
+        IF argv:0 IS EQUAL TO "--help" THEN
+            CALL SUB-PROCEDURE help
+        END IF
+
+        IF argv:0 IS EQUAL TO "-v" THEN
+            CALL SUB-PROCEDURE version
+        END IF
+
+        IF argv:0 IS EQUAL TO "--version" THEN
+            CALL SUB-PROCEDURE version
+            EXIT
+        END IF
+    END IF
+END IF
+
+CALL SUB-PROCEDURE find-min-max
+
+DISPLAY "Min (" local.min ") Max (" local.max ")" CRLF
