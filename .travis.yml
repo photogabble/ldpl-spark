@@ -6,4 +6,4 @@ before_script:
     - cd -
 
 script:
-    - ./test
+    - roundup ./spark-test.sh
