@@ -23,35 +23,39 @@
 
 DATA:
 
-local.n IS NUMBER
-local.numbers IS NUMBER VECTOR
-local.ticks IS TEXT VECTOR
+const.ticks IS TEXT VECTOR
 
-local.min IS NUMBER
-local.max IS NUMBER
+min IS NUMBER
+max IS NUMBER
+output IS TEXT
 
 i IS NUMBER
 n IS NUMBER
+
+normalise.x IS NUMBER
+normalise.a IS NUMBER
+normalise.b IS NUMBER
 
 PROCEDURE:
 
 #
 # Initial state for min/max
 #
-STORE 0 IN local.min
-STORE 0 IN local.max
+STORE 0 IN min
+STORE 0 IN max
+STORE "" IN output
 
 #
 # Constants
 #
-STORE "▁" IN local.ticks:0
-STORE "▂" IN local.ticks:1
-STORE "▃" IN local.ticks:2
-STORE "▄" IN local.ticks:3
-STORE "▅" IN local.ticks:4
-STORE "▆" IN local.ticks:5
-STORE "▇" IN local.ticks:6
-STORE "█" IN local.ticks:7
+STORE "▁" IN const.ticks:0
+STORE "▂" IN const.ticks:1
+STORE "▃" IN const.ticks:2
+STORE "▄" IN const.ticks:3
+STORE "▅" IN const.ticks:4
+STORE "▆" IN const.ticks:5
+STORE "▇" IN const.ticks:6
+STORE "█" IN const.ticks:7
 
 #
 # If argument is -h or --help, display usage and exit
@@ -84,22 +88,42 @@ SUB-PROCEDURE find-min-max
     STORE 0 IN i
     WHILE i IS LESS THAN argc DO
         IF i IS EQUAL TO 0 THEN
-            STORE argv:i IN local.min
-            STORE argv:i IN local.max
+            STORE argv:i IN min
+            STORE argv:i IN max
         END IF
 
         STORE argv:i IN n
 
-        IF n IS LESS THAN local.min THEN
-            STORE argv:i IN local.min
+        IF n IS LESS THAN min THEN
+            STORE argv:i IN min
         END IF
 
-        IF n IS GREATER THAN local.max THEN
-            STORE argv:i IN local.max
+        IF n IS GREATER THAN max THEN
+            STORE argv:i IN max
         END IF
 
-        DISPLAY argv:i CRLF
+        ADD i AND 1 IN i
+    REPEAT
+END SUB-PROCEDURE
 
+#
+# Normalise Values between 0 and 7
+# (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed
+#
+SUB-PROCEDURE normalise
+    SUBTRACT min FROM max IN normalise.x
+    IF normalise.x IS LESS THAN 0 THEN
+        STORE 0 IN normalise.x
+    END IF
+
+    STORE 0 IN i
+        WHILE i IS LESS THAN argc DO
+            STORE argv:i IN n
+            SUBTRACT min FROM n IN normalise.a
+            DIVIDE normalise.a BY normalise.x IN normalise.b
+            MULTIPLY normalise.b BY 7 IN normalise.a
+            FLOOR normalise.a
+            JOIN const.ticks:normalise.a AND output IN output
         ADD i AND 1 IN i
     REPEAT
 END SUB-PROCEDURE
@@ -126,5 +150,5 @@ IF argc IS LESS THAN OR EQUAL TO 1 THEN
 END IF
 
 CALL SUB-PROCEDURE find-min-max
-
-DISPLAY "Min (" local.min ") Max (" local.max ")" CRLF
+CALL SUB-PROCEDURE normalise
+DISPLAY output CRLF
