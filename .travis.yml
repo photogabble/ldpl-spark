@@ -4,6 +4,9 @@ before_script:
     - curl -L https://github.com/bmizerany/roundup/tarball/v0.0.6 | tar xvzf -
     - cd bmizerany-roundup-f526c39 && ./configure && make && sudo make install
     - cd -
+    - curl -L https://github.com/Lartu/ldpl/tarball/1.1.0 | tar xvzf -
+    - cd Lartu-ldpl-6a4d2f0/src && make && sudo mv ldpl "$(dirname $(which make))"/ldpl
+    - cd -
 
 script:
     - roundup ./spark-test.sh
